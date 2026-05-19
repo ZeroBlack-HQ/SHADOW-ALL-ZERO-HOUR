@@ -14,7 +14,21 @@ jobs:
 
       - name: Compile and Package UE5 Project
         run: |
-          echo "Compiling C++ Source and Packaging APK..."
+          echo "Starting Real UE5 Compilation..."
+          ./Engine/Build/BatchFiles/RunUAT.sh BuildCookRun \
+            -project="$GITHUB_WORKSPACE/ShadowShooter.uproject" \
+            -platform=Android \
+            -clientconfig=Development \
+            -cook \
+            -stage \
+            -archive \
+            -pak \
+            -prereqs \
+            -nodebuginfo \
+            -targetplatform=Android \
+            -cookflavor=ASTC \
+            -build \
+            -utf8output
 
       - name: Upload ShadowShooter APK
         uses: actions/upload-artifact@v4
