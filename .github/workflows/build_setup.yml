@@ -1,0 +1,33 @@
+name: Build Shadow Shooter Mobile
+on:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant Execute Permission for Gradle
+        run: chmod +x gradlew
+        continue-on-error: true
+
+      - name: Build Android APK
+        run: ./gradlew assembleDebug --no-daemon
+        continue-on-error: true
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ShadowShooter-Debug-APK
+          path: "**/build/outputs/apk/debug/*.apk"
