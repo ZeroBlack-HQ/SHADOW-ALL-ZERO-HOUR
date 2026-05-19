@@ -1,37 +1,50 @@
-name: Build Shadow Shooter Mobile UE5
+name: ShadowShooter Build
+
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  build-android:
+  build-and-package:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Android NDK and SDK for UE5
-        uses: android-actions/setup-android@v3
+    - name: Setup UE5 Environment
+      uses: mik14a/setup-ue@v1
+      with:
+        ue-version: "5.3"
 
-      - name: Compile and Package UE5 Project
-        run: |
-          echo "Starting Real UE5 Compilation..."
-          ./Engine/Build/BatchFiles/RunUAT.sh BuildCookRun \
-            -project="$GITHUB_WORKSPACE/ShadowShooter.uproject" \
-            -platform=Android \
-            -clientconfig=Development \
-            -cook \
-            -stage \
-            -archive \
-            -pak \
-            -prereqs \
-            -nodebuginfo \
-            -targetplatform=Android \
-            -cookflavor=ASTC \
-            -build \
-            -utf8output
+    - name: Verify RunUAT.sh exists
+      run: |
+        echo "Verifying RunUAT.sh..."
+        ls -l /home/runner/work/UnrealEngine/UnrealEngine/Engine/Build/BatchFiles/RunUAT.sh
 
-      - name: Upload ShadowShooter APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: ShadowShooter-Debug-APK
-          path: "Binaries/Android/*.apk"
+    - name: Package for Android
+      run: |
+        /home/runner/work/UnrealEngine/UnrealEngine/Engine/Build/BatchFiles/RunUAT.sh BuildCookRun \
+        -project="$GITHUB_WORKSPACE/ShadowShooter.uproject" \
+        -platform=Android \
+        -clientconfig=Development \
+        -cook \
+        -stage \
+        -archive \
+        -pak \
+        -prereqs \
+        -nodebuginfo \
+        -targetplatform=Android \
+        -cookflavor=ASTC \
+        -build \
+        -utf8output
+      
+    - name: Upload APK and OBB
+      uses: actions/upload-artifact@v4
+      with:
+        name: SHADOWFALL-ZERO-HOUR
+        path: |
+          **/Android/*.apk
+          **/Android/*.obb
+
